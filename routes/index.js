@@ -48,7 +48,16 @@ router.get('/chatlogs/:userid' , (req,res) => {
                   $gt: ObjectId(start)
                 } , author : req.params.userid
               } ,null,{ sort :{ timestamp : -1} , limit : limit } ,function(err, items) {
-                res.status(200).json(items)
+                if(items.length > 0)
+                {
+                    res.status(200).json(items)
+                }
+                else 
+                {
+                    res.status(404).json({
+                        "message" : "Record Not found"
+                    })
+                }
             }).clone()
             
         }
@@ -57,7 +66,16 @@ router.get('/chatlogs/:userid' , (req,res) => {
             Chatlog.find({
                 author: req.params.userid
             },null,{ sort :{ timestamp : -1} , limit : limit } , function(err, items) {
-                res.status(200).json(items)
+                if(items.length > 0)
+                {
+                    res.status(200).json(items)
+                }
+                else 
+                {
+                    res.status(404).json({
+                        "message" : "Record Not found"
+                    })
+                }
             }).clone()
             
         }
@@ -68,7 +86,16 @@ router.get('/chatlogs/:userid' , (req,res) => {
                   $gt: ObjectId(start)
                 } , author : req.params.userid
               } ,null,{ sort :{ timestamp : -1} , limit : 10 } ,function(err, items) {
-                res.status(200).json(items)
+                if(items.length > 0)
+                {
+                    res.status(200).json(items)
+                }
+                else 
+                {
+                    res.status(404).json({
+                        "message" : "Record Not found"
+                    })
+                }
             } ).clone()
         }
         else 
@@ -76,7 +103,16 @@ router.get('/chatlogs/:userid' , (req,res) => {
             Chatlog.find({
                 author : req.params.userid
               } ,null,{ sort :{ timestamp : -1} , limit : 10 } ,function(err, items) {
-                res.status(200).json(items)
+                if(items.length > 0)
+                {
+                    res.status(200).json(items)
+                }
+                else 
+                {
+                    res.status(404).json({
+                        "message" : "Record Not found"
+                    })
+                }
             } ).clone()
         }
     }
@@ -94,10 +130,20 @@ router.delete('/chatlogs/:userid',async (req,res) => {
     let userid = req.params.userid ;
     try 
     {
-        await Chatlog.deleteMany({author : userid })
-        res.status(200).json({
-            "message" : "Records deleted by userid "
-        })
+        let user = await Chatlog.findOne({author : userid });
+        if(!user)
+        {
+            res.status(404).json({
+                "message" : "Record Not found"
+            })
+        }
+        else 
+        {
+            await Chatlog.deleteMany({author : userid });
+            res.status(200).json({
+                "message" : "Records deleted by userid "
+            })
+        }
     }
     catch(e)
     {
@@ -113,11 +159,22 @@ router.delete('/chatlogs/:userid',async (req,res) => {
 router.delete('/chatlogs/:userid/:msgid' ,async (req,res) => {
     try
     {
-        await Chatlog.deleteOne({
-            author : req.params.userid , _id : req.params.msgid  })
-        res.status(200).json({
-            "message" : "Records deleted by userid and msgid"
-        })
+        let user = await Chatlog.findOne({author : req.params.userid , _id : req.params.msgid});
+        if(!user)
+        {
+            res.status(404).json({
+                "message" : "Record Not found"
+            })
+        }
+        else 
+        {
+            await Chatlog.deleteOne({
+                author : req.params.userid , _id : req.params.msgid  })
+            res.status(200).json({
+                "message" : "Records deleted by userid and msgid"
+            })
+        }
+       
     }
     catch(e)
     {
